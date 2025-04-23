@@ -23,11 +23,16 @@ func main() {
 	}))
 
 	auth := r.Group("/auth/")
+	jobs := r.Group("/jobs/")
+
+
 	auth.POST("/register",  controllers.Register)
 	auth.POST("/login", controllers.LogIn)
 	auth.PUT("/edit", controllers.EditUserInfo)
 	auth.GET("/verify", controllers.Verify)
 	auth.GET("/data", controllers.GetAuthenticatedUserData)
+
+	jobs.GET("/", controllers.GetAllJobs)
 
 	r.Run()
 }

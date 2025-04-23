@@ -1,24 +1,37 @@
 import { useEffect, useState } from 'react';
 import { useAuth } from '../../authContext';
+import axios from 'axios';
 
 function Edit() {
   const { user, edit } = useAuth();
   const [username, setUsername] = useState('');
   const [bio, setBio] = useState('');
+  const [jobs, setJobs] = useState([]);
+  const [selectedJobsId, setSelectedJobsId] = useState(user);
 
   const handleEdit = (e) => {
     e.preventDefault();
     edit(username, bio, user.pfpPath);
     window.location.reload();
   };
-
   useEffect(() => {
-    setUsername(user?.username || '');
-    setBio(user?.bio || '');
+    async function fetchJobs() {
+      try {
+        const response = await axios.get('http://localhost:8080/jobs/');
+        setJobs(response.data.jobs);
+      } catch (error) {
+        console.error("Error fetching jobs:", error);
+      }
+    }
+
+    fetchJobs();
+    setUsername(user?.username ?? '');
+    setBio(user?.bio ?? '');
   }, [user]);
 
+
   return (
-    <section className="bg-white dark:bg-gray-900">
+    <section className="bg-white dark:bg-gray-800">
       <div className="max-w-2xl px-4 py-8 mx-auto lg:py-16">
         <h2 className="mb-4 text-xl font-bold text-gray-900 dark:text-white">
           Update {user?.username} profile
@@ -58,6 +71,31 @@ function Edit() {
                 onChange={(e) => setBio(e.target.value)}
                 value={bio}
               ></textarea>
+            </div>
+            <div className="sm:col-span-2">
+              <ul>
+                {jobs.map((job) => (
+                  <li key={job.id}>
+                    <div className="flex items-center mb-4">
+   <input
+    id={`radio-${job.id}`}
+    type="radio"
+    value={job.id}
+    name="job-radio"
+    className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
+    checked={selectedJobsId === job.id}
+    onChange={(e) => setSelectedJobsId(+e.target.value)}
+  />
+  <label
+    htmlFor={`radio-${job.id}`}
+    className="ms-2 text-sm font-medium text-gray-900 dark:text-gray-300"
+  >
+    {job.Name}
+  </label>
+</div>
+                  </li>
+                ))}
+              </ul>
             </div>
           </div>
           <div className="flex items-center space-x-4">

@@ -4,8 +4,10 @@ import { useAuth } from '../authContext'
 
 function Home() {
   const { user } = useAuth()
-  console.log(user)
-  console.log(user?.username)
+  useEffect(() => {
+    console.log(user)
+    console.log(user?.username)
+  }, [user])
 
   return (
     <section className="bg-white dark:bg-gray-900">

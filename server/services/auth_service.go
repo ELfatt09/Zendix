@@ -5,7 +5,6 @@ import (
 	"go-freelance-app/initializers"
 	"go-freelance-app/models"
 	"go-freelance-app/utils"
-	"strings"
 
 	"golang.org/x/crypto/bcrypt"
 )
@@ -43,8 +42,7 @@ func LogInService(email, password string) (string, error) {
 	return tokenString, nil
 }
 
-func GetAuthenticatedUserDataService(authorizationHeader string) (models.User, error) {
-	tokenString := strings.TrimPrefix(authorizationHeader, "Bearer ")
+func GetAuthenticatedUserDataService(tokenString string) (models.User, error) {
 	claim, err := utils.ParseToken(tokenString)
 
 	if err != nil {

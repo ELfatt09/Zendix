@@ -60,8 +60,8 @@ func LogIn(c *gin.Context) {
 }
 
 func GetAuthenticatedUserData(c *gin.Context) {
-	tokenString := c.GetHeader("Authorization")
-	if tokenString == "bearer " {
+	tokenString := strings.TrimPrefix(c.GetHeader("Authorization"), "Bearer ")
+	if tokenString == "Bearer " {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "Token empty"})
 		return
 	}
@@ -77,6 +77,8 @@ func GetAuthenticatedUserData(c *gin.Context) {
 		"username": user.Username,
 		"pfpPath":  user.PfpPath,
 		"bio":      user.Bio,
+		"jobId": 	user.JobID,
+		"job": 		user.Job,
 	})
 }
 func Verify(c *gin.Context) {
