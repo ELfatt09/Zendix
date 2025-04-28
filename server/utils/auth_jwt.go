@@ -1,8 +1,10 @@
 package utils
 
 import (
+	"errors"
 	"go-freelance-app/models"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
@@ -37,6 +39,7 @@ func CreateToken(user models.User) (string, error) {
 		"sub":      user.ID,
 		"email":    user.Email,
 		"username": user.Username,
+		"verified": user.VerifiedAt != nil && user.VerifiedAt.Unix() != 0,
 	})
 
 	return token.SignedString([]byte(os.Getenv("SECRET_KEY")))
@@ -45,4 +48,12 @@ func CreateToken(user models.User) (string, error) {
 func IsTokenExpired(claims jwt.MapClaims) bool {
 	exp := claims["exp"].(float64)
 	return time.Unix(int64(exp), 0).Before(time.Now())
+}
+
+func GetTokenFromHeader(authHeader string) (string, error) {
+	tokenString := strings.TrimPrefix(authHeader, "Bearer ")
+	if tokenString == "" {
+		return tokenString, errors.New("token not found")
+	}
+	return tokenString, nil
 }

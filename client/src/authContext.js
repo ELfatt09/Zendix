@@ -86,7 +86,7 @@ const isAuthenticated = async () => {
     return false;
   }
   try {
-    const res = await axios.get('http://localhost:8080/auth/verify', {
+    const res = await axios.get('http://localhost:8080/auth/validate', {
       headers: { Authorization: `Bearer ${token}` }
     });
     setAuth(res.data.auth);
@@ -114,7 +114,7 @@ const isAuthenticated = async () => {
 
   const edit = (username, bio, pfpPath) => {
     const token = localStorage.getItem('token');
-    axios.put('http://localhost:8080/auth/edit', {
+    axios.put('http://localhost:8080/profile/edit', {
       "Username": username,
       "Bio": bio,
       "PfpPath": pfpPath

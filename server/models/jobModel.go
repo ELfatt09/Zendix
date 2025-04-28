@@ -6,6 +6,5 @@ import (
 
 type Job struct {
 	gorm.Model
-	Job_ID uint
 	Name string
 }

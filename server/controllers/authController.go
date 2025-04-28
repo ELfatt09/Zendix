@@ -2,7 +2,6 @@ package controllers
 
 import (
 	"net/http"
-	"strings"
 
 	"go-freelance-app/services"
 	"go-freelance-app/utils"
@@ -60,9 +59,9 @@ func LogIn(c *gin.Context) {
 }
 
 func GetAuthenticatedUserData(c *gin.Context) {
-	tokenString := strings.TrimPrefix(c.GetHeader("Authorization"), "Bearer ")
-	if tokenString == "Bearer " {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "Token empty"})
+	tokenString, err := utils.GetTokenFromHeader(c.GetHeader("Authorization"))
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
 		return
 	}
 
@@ -81,19 +80,39 @@ func GetAuthenticatedUserData(c *gin.Context) {
 		"job": 		user.Job,
 	})
 }
-func Verify(c *gin.Context) {
-	tokenString := strings.TrimPrefix(c.GetHeader("Authorization"), "Bearer ")
-	if tokenString == "" {
-		c.JSON(http.StatusUnauthorized, gin.H{"auth": false})
+func IsValid(c *gin.Context) {
+	tokenString, err := utils.GetTokenFromHeader(c.GetHeader("Authorization"))
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
 		return
 	}
 
-	if _, err := services.VerifyAuthTokenService(tokenString); err != nil {
+
+	if _, err := services.ValidateAuthTokenService(tokenString); err != nil {
 		c.JSON(http.StatusUnauthorized, gin.H{"auth": false})
 		return
 	}
 
 	c.JSON(http.StatusOK, gin.H{"auth": true})
+}
+
+func EmailVerification(c *gin.Context) {
+	var body struct {
+		Token string
+	}
+	tokenString, err := utils.GetTokenFromHeader(c.GetHeader("Authorization"))
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
+		return
+	}
+	c.BindJSON(&body)
+	err = services.VerifyUser(tokenString, body.Token)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "Email verified successfully"})
 }
 
 func EditUserInfo(c *gin.Context) {
@@ -108,9 +127,9 @@ func EditUserInfo(c *gin.Context) {
 		return
 	}
 
-	tokenString := strings.TrimPrefix(c.GetHeader("Authorization"), "Bearer ")
-	if tokenString == "" {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "Token empty"})
+	tokenString, err := utils.GetTokenFromHeader(c.GetHeader("Authorization"))
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
 		return
 	}
 

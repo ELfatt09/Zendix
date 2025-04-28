@@ -6,6 +6,7 @@ import (
 
 	"go-freelance-app/controllers"
 	"go-freelance-app/initializers"
+	middlewares "go-freelance-app/middleware"
 )
 
 func init() {
@@ -24,13 +25,16 @@ func main() {
 
 	auth := r.Group("/auth/")
 	jobs := r.Group("/jobs/")
+	profile := r.Group("/profile/")
 
-
-	auth.POST("/register",  controllers.Register)
+	auth.POST("/register", controllers.Register)
 	auth.POST("/login", controllers.LogIn)
-	auth.PUT("/edit", controllers.EditUserInfo)
-	auth.GET("/verify", controllers.Verify)
-	auth.GET("/data", controllers.GetAuthenticatedUserData)
+
+	profile.PUT("/edit", middlewares.RequireAuth, middlewares.RequireVerification, controllers.EditUserInfo)
+
+	auth.GET("/validate", controllers.IsValid)
+	auth.GET("/data", middlewares.RequireAuth, controllers.GetAuthenticatedUserData)
+	auth.POST("/verification/", controllers.EmailVerification)
 
 	jobs.GET("/", controllers.GetAllJobs)
 
