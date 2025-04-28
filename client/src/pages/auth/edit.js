@@ -7,11 +7,11 @@ function Edit() {
   const [username, setUsername] = useState('');
   const [bio, setBio] = useState('');
   const [jobs, setJobs] = useState([]);
-  const [selectedJobsId, setSelectedJobsId] = useState(user);
+  const [selectedJobsId, setSelectedJobsId] = useState(0);
 
   const handleEdit = (e) => {
     e.preventDefault();
-    edit(username, bio, user.pfpPath);
+    edit(username, bio, user.pfpPath, selectedJobsId);
     window.location.reload();
   };
   useEffect(() => {
@@ -83,11 +83,11 @@ function Edit() {
     value={job.id}
     name="job-radio"
     className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
-    checked={selectedJobsId === job.id}
+    checked={selectedJobsId === job.ID}
     onChange={(e) => setSelectedJobsId(+e.target.value)}
   />
   <label
-    htmlFor={`radio-${job.id}`}
+    htmlFor={`radio-${job.ID}`}
     className="ms-2 text-sm font-medium text-gray-900 dark:text-gray-300"
   >
     {job.Name}

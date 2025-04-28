@@ -120,6 +120,7 @@ func EditUserInfo(c *gin.Context) {
 		Username string
 		Bio      string
 		PfpPath  string
+		JobID    uint
 	}
 
 	if err := c.Bind(&body); err != nil {
@@ -143,5 +144,6 @@ func EditUserInfo(c *gin.Context) {
 		"username": user.Username,
 		"pfpPath":  user.PfpPath,
 		"bio":      user.Bio,
+		"jobId": 	user.JobID,
 	})
 }

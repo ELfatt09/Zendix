@@ -13,6 +13,11 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
+// RegisterService registers a new user in the database, given their email, password, and username.
+// The password is hashed with bcrypt and the user is created with the given email and username.
+// An error is returned if there is an issue generating the hash, or if there is an issue
+// creating the user in the database. The function also sends a verification email to the user's
+// email address.
 func RegisterService(email, password, username string) (models.User, error) {
 	hash, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
 	if err != nil {
@@ -30,6 +35,12 @@ func RegisterService(email, password, username string) (models.User, error) {
 }
 
 
+// LogInService authenticates a user by verifying their email and password.
+// It retrieves the user from the database using the provided email and
+// compares the stored hashed password with the provided password using bcrypt.
+// If authentication is successful, a JWT token is generated and returned.
+// Returns an error if the user is not found, the password is invalid, or
+// if there is an issue creating the token.
 func LogInService(email, password string) (string, error) {
 	var user models.User
 	initializers.DB.First(&user, "email = ?", email)
@@ -49,6 +60,9 @@ func LogInService(email, password string) (string, error) {
 	return tokenString, nil
 }
 
+// GetAuthenticatedUserDataService retrieves the user associated with the given JWT token.
+// The token is parsed and the user is retrieved from the database using the sub claim.
+// If the token is invalid, an error is returned. Otherwise, the user is returned.
 func GetAuthenticatedUserDataService(tokenString string) (models.User, error) {
 	claim, err := utils.ParseToken(tokenString)
 
@@ -61,6 +75,8 @@ func GetAuthenticatedUserDataService(tokenString string) (models.User, error) {
 
 	return user, nil
 }
+
+
 
 func EditUserInfoService(tokenString, username, bio, pfpPath string) (models.User, error) {
 	claim, err := utils.ParseToken(tokenString)
@@ -82,6 +98,10 @@ func EditUserInfoService(tokenString, username, bio, pfpPath string) (models.Use
 	return user, nil
 }
 
+// ValidateAuthTokenService validates the provided JWT token string.
+// It parses the token to extract claims and checks if the token is expired.
+// Returns true if the token is valid and not expired, along with a nil error.
+// Returns false with an error if the token is invalid or expired.
 func ValidateAuthTokenService(tokenString string) (bool, error) {
 	claim, err := utils.ParseToken(tokenString)
 

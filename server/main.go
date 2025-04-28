@@ -30,9 +30,9 @@ func main() {
 	auth.POST("/register", controllers.Register)
 	auth.POST("/login", controllers.LogIn)
 
-	profile.PUT("/edit", middlewares.RequireAuth, middlewares.RequireVerification, controllers.EditUserInfo)
+	profile.PUT("/edit", middlewares.RequireVerification, controllers.EditUserInfo)
 
-	auth.GET("/validate", controllers.IsValid)
+	auth.GET("/validate", middlewares.RequireAuth, controllers.IsValid)
 	auth.GET("/data", middlewares.RequireAuth, controllers.GetAuthenticatedUserData)
 	auth.POST("/verification/", controllers.EmailVerification)
 
