@@ -7,6 +7,6 @@ import (
 type Verification_token struct {
 	gorm.Model
 	Token string
-	User  User `gorm:"foreignKey:UserID;constraint:OnDelete:CASCADE;constraint:OnUpdate:CASCADE"`
-	UserID uint
+	User      User `gorm:"foreignKey:UserID"`
+	UserID    uint `gorm:"index;unique"`
 }

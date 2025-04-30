@@ -29,7 +29,7 @@ func RegisterService(email, password, username string) (models.User, error) {
 		return models.User{}, err
 	}
 
-	SendVerificationEmail(email, username)
+	SendVerificationEmail(email)
 
 	return user, nil
 }
@@ -71,27 +71,28 @@ func GetAuthenticatedUserDataService(tokenString string) (models.User, error) {
 	}
 
 	var user models.User
-	initializers.DB.First(&user, "id = ?", claim["sub"])
+	initializers.DB.Preload("Job").First(&user, "id = ?", claim["sub"])
 
 	return user, nil
 }
 
 
 
-func EditUserInfoService(tokenString, username, bio, pfpPath string) (models.User, error) {
+func EditUserInfoService(tokenString, username, bio, pfpPath string, jobID *uint) (models.User, error) {
 	claim, err := utils.ParseToken(tokenString)
 	if err != nil {
 		return models.User{}, errors.New("token not valid")
 	}
 
 	var user models.User
-	initializers.DB.First(&user, "id = ?", claim["sub"])
+	initializers.DB.Preload("Job").First(&user, "id = ?", claim["sub"])
 
 	user.Username = username
 	user.Bio = bio
 	user.PfpPath = pfpPath
+	user.JobID = jobID
 
-	if err := initializers.DB.Save(&user).Error; err != nil {
+	if err := initializers.DB.Preload("Job").Save(&user).Error; err != nil {
 		return models.User{}, err
 	}
 
@@ -118,7 +119,21 @@ func ValidateAuthTokenService(tokenString string) (bool, error) {
 	return true, nil
 }
 
-func SendVerificationEmail(userEmail string, username string) error {
+func IsUserVerifiedService(tokenString string) (bool, error) {
+	claim, err := utils.ParseToken(tokenString)
+
+	if err != nil {
+		return false, errors.New("token not valid")
+	}
+
+	log.Println(claim["verified"].(bool))
+	return claim["verified"].(bool), nil
+	}
+
+func SendVerificationEmail(userEmail string) error {
+	var user models.User
+	initializers.DB.Select("username").First(&user, "email = ?", userEmail)
+	username := user.Username
 	from := os.Getenv("APP_EMAIL_ADDRESS")
 	pass := os.Getenv("APP_EMAIL_PASSWORD")
 	to := userEmail
@@ -150,6 +165,11 @@ func CreateVerificationToken(userEmail string) (string, error) {
 
 	initializers.DB.First(&user, "email = ?", userEmail)
 	id := user.ID
+	
+	initializers.DB.First(&token, "UserID = ?", id)
+	if token.ID != 0 {
+		initializers.DB.Delete(&token)
+	}
 
 	verificationToken := utils.GenerateRandomString(6)
 	initializers.DB.First(&token, "Token = ?", verificationToken)

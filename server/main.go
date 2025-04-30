@@ -32,9 +32,11 @@ func main() {
 
 	profile.PUT("/edit", middlewares.RequireVerification, controllers.EditUserInfo)
 
-	auth.GET("/validate", middlewares.RequireAuth, controllers.IsValid)
+	auth.GET("/validate", controllers.IsValid)
 	auth.GET("/data", middlewares.RequireAuth, controllers.GetAuthenticatedUserData)
-	auth.POST("/verification/", controllers.EmailVerification)
+	auth.POST("/verification", controllers.EmailVerification)
+	auth.GET("/verified", controllers.IsVerified)
+	auth.POST("/verification/resend", controllers.SendVerificationEmail)
 
 	jobs.GET("/", controllers.GetAllJobs)
 

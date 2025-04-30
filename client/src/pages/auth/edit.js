@@ -8,12 +8,12 @@ function Edit() {
   const [bio, setBio] = useState('');
   const [jobs, setJobs] = useState([]);
   const [selectedJobsId, setSelectedJobsId] = useState(0);
+  const [selectedJobsName, setSelectedJobsName] = useState('');
 
   const handleEdit = (e) => {
     e.preventDefault();
     edit(username, bio, user.pfpPath, selectedJobsId);
-    window.location.reload();
-  };
+ };
   useEffect(() => {
     async function fetchJobs() {
       try {
@@ -23,8 +23,9 @@ function Edit() {
         console.error("Error fetching jobs:", error);
       }
     }
-
     fetchJobs();
+    setSelectedJobsName(user?.job?.Name ?? '');
+    setSelectedJobsId(user?.jobId);
     setUsername(user?.username ?? '');
     setBio(user?.bio ?? '');
   }, [user]);
@@ -73,29 +74,29 @@ function Edit() {
               ></textarea>
             </div>
             <div className="sm:col-span-2">
-              <ul>
+              <label
+                htmlFor="jobs"
+                className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+              >
+                Select Job
+              </label>
+              <select
+                id="jobs"
+                name="jobs"
+                className="w-full text-sm text-gray-900 bg-gray-50 border border-gray-300 rounded-lg focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                value={selectedJobsId}
+                onChange={(e) => {
+                  setSelectedJobsId(parseInt(e.target.value)) 
+                  setSelectedJobsName(e.target.options[e.target.selectedIndex].text)
+                }}
+              >
+                <option value={selectedJobsId}>{selectedJobsName}</option>
                 {jobs.map((job) => (
-                  <li key={job.id}>
-                    <div className="flex items-center mb-4">
-   <input
-    id={`radio-${job.id}`}
-    type="radio"
-    value={job.id}
-    name="job-radio"
-    className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
-    checked={selectedJobsId === job.ID}
-    onChange={(e) => setSelectedJobsId(+e.target.value)}
-  />
-  <label
-    htmlFor={`radio-${job.ID}`}
-    className="ms-2 text-sm font-medium text-gray-900 dark:text-gray-300"
-  >
-    {job.Name}
-  </label>
-</div>
-                  </li>
+                  <option key={job.ID} value={job.ID}>
+                    {job.Name}
+                  </option>
                 ))}
-              </ul>
+              </select>
             </div>
           </div>
           <div className="flex items-center space-x-4">

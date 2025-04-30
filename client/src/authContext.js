@@ -9,9 +9,12 @@ const AuthContext = createContext();
 
 export function AuthProvider({ children }) {
   const navigate = useNavigate();
+  const [token, setToken] = useState(localStorage.getItem('token'));
   const [error, setError] = useState(null);
+  const [message, setMessage] = useState(null);
   const [user, setUser] = useState(null);
   const [auth, setAuth] = useState(true);
+  const [verified, setVerified] = useState(true);
   const [loading, setLoading] = useState(false);
 
   const register = (email, password, confirmPassword, username) => {
@@ -74,9 +77,25 @@ export function AuthProvider({ children }) {
     window.location.reload();
   };
 
+  const verifyEmail = (VerificationToken) => { 
+    axios
+      .post('http://localhost:8080/auth/verification', { 'Token': VerificationToken }, { headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${getToken()}` } })
+      .then((res) => { 
+        if (res.data) {
+          console.log(res.data.message);
+        }
+      })
+      .catch((err) => {
+        if (err.response && err.response.data) {
+          console.log(err.response.data.error);
+        }
+      });
+
+  }
+
   const getToken = () => localStorage.getItem('token');
 
-// Dalam AuthContext.js
+  // Dalam AuthContext.js
 const isAuthenticated = async () => {
   const token = getToken();
   setLoading(true); // Mulai loading
@@ -97,7 +116,28 @@ const isAuthenticated = async () => {
     setLoading(false); // Selesai loading
     return false;
   }
-};
+  };
+  
+  const isVerified = async () => {
+    const token = getToken();
+    setLoading(true); // Mulai loading
+    if (!token) {
+      await setVerified(false);
+      setLoading(false); // Selesai loading
+      return false;
+    }
+    try {
+      const res = await axios.get('http://localhost:8080/auth/verified', {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      setVerified(res.data.verified);
+      setLoading(false); // Selesai loading
+      return res.data.verified;
+    } catch (err) {
+      setLoading(false); // Selesai loading
+      return false;
+    }
+  };
 
   const getAuthenticatedUser = async () => {
     try {
@@ -114,7 +154,7 @@ const isAuthenticated = async () => {
 
   const edit = (username, bio, pfpPath, JobID) => {
     const token = localStorage.getItem('token');
-    axios.put('http://localhost:8080/profile/edit', {
+    const res = axios.put('http://localhost:8080/profile/edit', {
       "Username": username,
       "Bio": bio,
       "PfpPath": pfpPath,
@@ -132,13 +172,15 @@ const isAuthenticated = async () => {
   useEffect(() => {
     isAuthenticated().then((authStatus) => {
       if (authStatus) {
+        isVerified();
+        setToken(getToken());
         getAuthenticatedUser();
       }
     });
   }, []);
 
   return (
-    <AuthContext.Provider value={{ user, auth,loading, error, register, login, logout, edit }}>
+    <AuthContext.Provider value={{ user, auth, verified, loading, error, token, register, login, logout, edit, verifyEmail, }}>
       {children}
     </AuthContext.Provider>
   );

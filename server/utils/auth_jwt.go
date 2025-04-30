@@ -30,6 +30,7 @@ func ParseToken(tokenString string) (jwt.MapClaims, error) {
 	return nil, nil
 }
 
+
 func CreateToken(user models.User) (string, error) {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		"iss":      "go-freelance-app",
@@ -39,7 +40,7 @@ func CreateToken(user models.User) (string, error) {
 		"sub":      user.ID,
 		"email":    user.Email,
 		"username": user.Username,
-		"verified": user.VerifiedAt != nil && user.VerifiedAt.Unix() != 0,
+		"verified": user.VerifiedAt != nil,
 	})
 
 	return token.SignedString([]byte(os.Getenv("SECRET_KEY")))
