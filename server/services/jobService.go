@@ -1,8 +1,8 @@
 package services
 
 import (
-	"go-freelance-app/initializers"
-	"go-freelance-app/models"
+	"zendix/initializers"
+	"zendix/models"
 )
 
 func GetAllJobsService() ([]models.Job, error) {

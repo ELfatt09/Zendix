@@ -1,10 +1,11 @@
 package controllers
 
 import (
+	"log"
 	"net/http"
 
-	"go-freelance-app/services"
-	"go-freelance-app/utils"
+	"zendix/services"
+	"zendix/utils"
 
 	"github.com/gin-gonic/gin"
 )
@@ -76,17 +77,17 @@ func GetAuthenticatedUserData(c *gin.Context) {
 		"username": user.Username,
 		"pfpPath":  user.PfpPath,
 		"bio":      user.Bio,
-		"jobId": 	user.JobID,
-		"job": 		user.Job,
+		"jobId":    user.JobID,
+		"job":      user.Job,
 	})
 }
 func IsValid(c *gin.Context) {
+	log.Println("token: " + c.GetHeader("Authorization"))
 	tokenString, err := utils.GetTokenFromHeader(c.GetHeader("Authorization"))
 	if err != nil {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
 		return
 	}
-
 
 	if _, err := services.ValidateAuthTokenService(tokenString); err != nil {
 		c.JSON(http.StatusUnauthorized, gin.H{"auth": false})
@@ -94,48 +95,6 @@ func IsValid(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{"auth": true})
-}
-
-func EmailVerification(c *gin.Context) {
-	var body struct {
-		Token string
-	}
-	tokenString, err := utils.GetTokenFromHeader(c.GetHeader("Authorization"))
-	if err != nil {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
-		return
-	}
-	c.BindJSON(&body)
-	err = services.VerifyUser(tokenString, body.Token)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-		return
-	}
-
-	c.JSON(http.StatusOK, gin.H{"message": "Email verified successfully"})
-}
-
-func SendVerificationEmail(c *gin.Context) {
-	tokenString, err := utils.GetTokenFromHeader(c.GetHeader("Authorization"))
-	if err != nil {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
-		return
-	}
-	parsedToken, err := utils.ParseToken(tokenString)
-	if err != nil {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
-		return
-	}
-
-	userEmail := parsedToken["email"].(string)
-
-	err = services.SendVerificationEmail(userEmail)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-		return
-	}
-
-	c.JSON(http.StatusOK, gin.H{"message": "Email sent successfully"})
 }
 
 func EditUserInfo(c *gin.Context) {
@@ -167,22 +126,57 @@ func EditUserInfo(c *gin.Context) {
 		"username": user.Username,
 		"pfpPath":  user.PfpPath,
 		"bio":      user.Bio,
-		"jobId": 	user.JobID,
+		"jobId":    user.JobID,
 	})
 }
 
-
-func IsVerified(c *gin.Context){
+func EditUserPfp(c *gin.Context) {
 	tokenString, err := utils.GetTokenFromHeader(c.GetHeader("Authorization"))
 	if err != nil {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
 		return
 	}
 
-	verified, err := services.IsUserVerifiedService(tokenString)
+	pfpImage, err := c.FormFile("PfpImage")
 	if err != nil {
-		c.JSON(http.StatusUnauthorized, gin.H{"verified": false})
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"verified": verified})
+
+	err = services.EditUserPfpService(tokenString, pfpImage)
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "Pfp changed successfully"})
+	
+}
+
+func ChangePassword(c *gin.Context) {
+	var body struct {
+		OldPassword string
+		NewPassword string
+	}
+
+	if err := c.Bind(&body); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid parameters"})
+		return
+	}
+
+	tokenString, err := utils.GetTokenFromHeader(c.GetHeader("Authorization"))
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
+		return
+	}
+
+	err = services.ChangePasswordService(tokenString, body.OldPassword, body.NewPassword)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "Password changed successfully"})
 }

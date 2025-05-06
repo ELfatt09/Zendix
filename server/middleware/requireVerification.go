@@ -1,8 +1,8 @@
 package middlewares
 
 import (
-	"go-freelance-app/utils"
 	"net/http"
+	"zendix/utils"
 
 	"github.com/gin-gonic/gin"
 )
@@ -31,6 +31,4 @@ func RequireVerification(c *gin.Context) {
 
 	c.Next()
 
-
-	
 }

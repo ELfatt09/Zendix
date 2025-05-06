@@ -2,10 +2,9 @@ package controllers
 
 import (
 	"net/http"
-	"go-freelance-app/services"
+	"zendix/services"
 
 	"github.com/gin-gonic/gin"
-
 )
 
 func GetAllJobs(c *gin.Context) {

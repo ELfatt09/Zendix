@@ -3,8 +3,8 @@ package middlewares
 import (
 	"net/http"
 
-	"go-freelance-app/services"
-	"go-freelance-app/utils"
+	"zendix/services"
+	"zendix/utils"
 
 	"github.com/gin-gonic/gin"
 )

@@ -4,9 +4,9 @@ import (
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 
-	"go-freelance-app/controllers"
-	"go-freelance-app/initializers"
-	middlewares "go-freelance-app/middleware"
+	"zendix/controllers"
+	"zendix/initializers"
+	middlewares "zendix/middleware"
 )
 
 func init() {
@@ -23,20 +23,25 @@ func main() {
 		AllowMethods:    []string{"GET", "POST", "PUT", "DELETE"},
 	}))
 
+	r.Static("/static", "./storage")
+
 	auth := r.Group("/auth/")
 	jobs := r.Group("/jobs/")
 	profile := r.Group("/profile/")
+
 
 	auth.POST("/register", controllers.Register)
 	auth.POST("/login", controllers.LogIn)
 
 	profile.PUT("/edit", middlewares.RequireVerification, controllers.EditUserInfo)
+	profile.PUT("edit//pfp", middlewares.RequireVerification, controllers.EditUserPfp)
 
 	auth.GET("/validate", controllers.IsValid)
 	auth.GET("/data", middlewares.RequireAuth, controllers.GetAuthenticatedUserData)
 	auth.POST("/verification", controllers.EmailVerification)
 	auth.GET("/verified", controllers.IsVerified)
 	auth.POST("/verification/resend", controllers.SendVerificationEmail)
+	auth.PUT("/password", middlewares.RequireAuth, middlewares.RequireVerification, controllers.ChangePassword)
 
 	jobs.GET("/", controllers.GetAllJobs)
 

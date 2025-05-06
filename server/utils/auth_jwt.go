@@ -2,10 +2,10 @@ package utils
 
 import (
 	"errors"
-	"go-freelance-app/models"
 	"os"
 	"strings"
 	"time"
+	"zendix/models"
 
 	"github.com/golang-jwt/jwt/v5"
 )
@@ -30,11 +30,10 @@ func ParseToken(tokenString string) (jwt.MapClaims, error) {
 	return nil, nil
 }
 
-
 func CreateToken(user models.User) (string, error) {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-		"iss":      "go-freelance-app",
-		"aud":      "go-freelance-app",
+		"iss":      "zendix",
+		"aud":      "zendix",
 		"iat":      time.Now().Unix(),
 		"exp":      time.Now().AddDate(0, 0, 7).Unix(),
 		"sub":      user.ID,

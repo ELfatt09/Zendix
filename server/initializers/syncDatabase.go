@@ -1,6 +1,6 @@
 package initializers
 
-import "go-freelance-app/models"
+import "zendix/models"
 
 func SyncDatabase() {
 	DB.AutoMigrate(&models.User{})

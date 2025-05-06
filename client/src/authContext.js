@@ -18,6 +18,7 @@ export function AuthProvider({ children }) {
   const [loading, setLoading] = useState(false);
 
   const register = (email, password, confirmPassword, username) => {
+    setLoading(true);
     if (!validateEmail(email)) {
       setError('Invalid email');
       return;
@@ -45,29 +46,38 @@ export function AuthProvider({ children }) {
       },
     })
       .then((res) => {
-        console.log(res.data);
-        alert('Registration successful');
+        console.log('register response', res.data);
+        setMessage('Registration successful');
       })
       .catch((err) => {
-        console.error(err);
+        console.error('register error', err);
         setError('Registration failed');
       });
+    setLoading(false);
+    return [error, message];
   };
 
   const login = (email, password) => {
+    setLoading(true);
     if (!validateEmail(email)) {
       setError('Invalid email');
       return;
     }
-    axios
+    const res = axios
       .post('http://localhost:8080/auth/login', { email, password }, { headers: { 'Content-Type': 'application/json' } })
       .then((res) => {
+        console.log('login response', res.data);
         localStorage.setItem('token', res.data.token);
         setAuth(true);
         navigate('/');
         getAuthenticatedUser(); // Fetch user data after login
       })
-      .catch((err) => setError(err.response.data.error));
+      .catch((err) => {
+        console.error('login error', err);
+        setError(err.response.data.error);
+      });
+    setLoading(false);
+    return error;
   };
 
   const logout = () => {
@@ -81,18 +91,52 @@ export function AuthProvider({ children }) {
     axios
       .post('http://localhost:8080/auth/verification', { 'Token': VerificationToken }, { headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${getToken()}` } })
       .then((res) => { 
+        console.log('verifyEmail response', res.data);
         if (res.data) {
-          console.log(res.data.message);
+          setMessage(res.data.message);
+          localStorage.setItem('token', res.data.token);
         }
       })
       .catch((err) => {
+        console.error('verifyEmail error', err);
         if (err.response && err.response.data) {
-          console.log(err.response.data.error);
+          setError(err.response.data.error);
+        }
+      });
+      return [error, message];
+  }
+  const changePassword = (OldPassword, NewPassword, NewPasswordConfirmation) => {
+    if (!validatePassword(NewPassword)) {
+      setError('Password must be at least 8 characters long and contain at least one uppercase letter, one lowercase letter, and one number');
+      return;
+    }
+    if (NewPassword !== NewPasswordConfirmation) {
+      setError('Passwords do not match');
+      return;
+    }
+    const res = axios.put('http://localhost:8080/auth/password', {
+      'OldPassword': OldPassword,
+      'NewPassword': NewPassword,
+    }, {
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${getToken()}`,
+      },
+    })
+      .then((res) => {
+        console.log('changePassword response', res.data);
+        if (res.data) {
+          setMessage(res.data.message);
+        }
+      })
+      .catch((err) => {
+        console.error('changePassword error', err);
+        if (err.response && err.response.data) {
+          setError(err.response.data.error);
         }
       });
 
   }
-
   const getToken = () => localStorage.getItem('token');
 
   // Dalam AuthContext.js
@@ -108,6 +152,7 @@ const isAuthenticated = async () => {
     const res = await axios.get('http://localhost:8080/auth/validate', {
       headers: { Authorization: `Bearer ${token}` }
     });
+    console.log('isAuthenticated response', res.data);
     setAuth(res.data.auth);
     setLoading(false); // Selesai loading
     return res.data.auth;
@@ -130,8 +175,10 @@ const isAuthenticated = async () => {
       const res = await axios.get('http://localhost:8080/auth/verified', {
         headers: { Authorization: `Bearer ${token}` }
       });
+      console.log('isVerified response', res.data);
       setVerified(res.data.verified);
       setLoading(false); // Selesai loading
+      
       return res.data.verified;
     } catch (err) {
       setLoading(false); // Selesai loading
@@ -144,10 +191,11 @@ const isAuthenticated = async () => {
       const res = await axios.get('http://localhost:8080/auth/data', {
         headers: { Authorization: `Bearer ${getToken()}` }
       });
+      console.log('getAuthenticatedUser response', res.data);
       setUser(res.data);
       return res.data;
     } catch (err) {
-      console.error(err);
+      console.error('getAuthenticatedUser error', err);
       return err.response.data;
     }
   };
@@ -177,10 +225,10 @@ const isAuthenticated = async () => {
         getAuthenticatedUser();
       }
     });
-  }, []);
+  }, [auth]);
 
   return (
-    <AuthContext.Provider value={{ user, auth, verified, loading, error, token, register, login, logout, edit, verifyEmail, }}>
+    <AuthContext.Provider value={{ user, auth, verified, loading, error, token, register, login, logout, edit, verifyEmail, changePassword}}>
       {children}
     </AuthContext.Provider>
   );
@@ -189,6 +237,4 @@ const isAuthenticated = async () => {
 export const useAuth = () => {
   return useContext(AuthContext)
 }
-
-
 

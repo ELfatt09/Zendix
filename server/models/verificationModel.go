@@ -8,5 +8,5 @@ type Verification_token struct {
 	gorm.Model
 	Token string
 	User      User `gorm:"foreignKey:UserID"`
-	UserID    uint `gorm:"index;unique"`
+	UserID    uint 
 }
