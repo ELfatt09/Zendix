@@ -3,7 +3,7 @@ import Navbar from '../components/navbar';
 
 function Layout(props) {
   return (
-    <div>
+    <div className='bg-background min-h-screen'>
       <Navbar />
       {props.children}
     </div>

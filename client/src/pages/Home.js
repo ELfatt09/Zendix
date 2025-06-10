@@ -2,34 +2,32 @@ import { useEffect } from 'react'
 import { useAuth } from '../authContext'
 import { NavLink } from 'react-router-dom'
 
-
 function Home() {
   const { user } = useAuth()
   useEffect(() => {
     console.log(user)
-    console.log(user?.username)
+    console.log(user?.fullname)
   }, [user])
 
   return (
-    <section className="bg-white">
-      <div className="w-full flex flex-row items-center h-min-screen">
-        <div className="w-full md:w-2/3 flex flex-col items-center">
-          <h1 className="text-center md:text-start text-7xl leading-normal font-bold text-slate-950 max-w-xl">
-            Dari <span className='text-violet-600'>Desain</span> hingga <span className='text-violet-600'>Kode</span>, Semua di <span className="bg-orange-400 text-orange-100 px-3 rounded-md">Zendix</span>
+    <>
+      <div className="w-full flex flex-row items-center justify-center h-full h-min-screen">
+        <div className="w-full md:w-2/3 flex flex-col items-center justify-center mt-10 relative">
+      
+          <h1 align="center" className="text-center text-6xl leading-normal font-bold text-text">
+            Platform Terpadu untuk Freelancer & Client IT – Bersama <span className="bg-clip-text text-transparent bg-gradient-to-br from-primary to-accent">Zilium</span>
           </h1>
-          <div className="flex items-center mt-10 justify-center max-w-xl">
-          <p className="text-xl w-2/3 font-light text-slate-950 max-w-xl leading-relaxed">
-            Temukan kolaborator teknologi & desain dalam hitungan menit.
-            </p>
-            <div className='w-1/3 flex items-center justify-center'>
-            <NavLink to="/auth/register" className="text-center bg-violet-600 text-white px-5 py-3 font-bold rounded-md  hover:bg-orange-400 hover:scale-105 transition ease-in-out duration-300">Register Now</NavLink>
-            </div>          </div>
+            <p className="text-xl w-2/3 mt-7 font-light text-center text-text max-w-xl leading-relaxed tracking-wide">
+Transaksi terproteksi, milestone terstruktur, komunikasi terintegrasi—semua demi hasil profesional.            </p>
+          <div className='mt-5 flex items-center justify-center space-x-3 font-normal tracking-wide'>
+            <NavLink to="/service" className="text-center bg-secondary/40 text-text px-8 py-3 rounded-md hover:bg-primary hover:scale-105 transition ease-in-out duration-300">Search Project</NavLink>
+            <NavLink to="/auth/register" className="text-lg font-medium text-center bg-accent text-text px-10 py-4 rounded-md hover:shadow-accent hover:shadow-[0_0px_200px_0px_rgba(0,0,0,1),0_4px_6px_-2px_rgba(0,0,0,1)] hover:scale-105 transition ease-in-out duration-300">Register Now</NavLink>
+            <NavLink to="/service" className="text-center bg-secondary/40 text-text px-8 py-3 rounded-md hover:bg-primary hover:scale-105 transition ease-in-out duration-300">Explore Services</NavLink>
+            </div>
+          </div>
+              
         </div>
-        <div className="w-0 md:w-1/3 min-h-screen h-full bg-violet-600">
-
-        </div>
-      </div>
-    </section>
+    </>
   )
 }
 

@@ -1,6 +1,6 @@
 import {createContext, useContext, useState, useEffect} from 'react';
 import { useNavigate } from 'react-router-dom';
-import { validateEmail, validatePassword, validateUsername } from './utils/validation'
+import { validateEmail, validatePassword, validateFullname } from './utils/validation'
 
 
 import axios from 'axios';
@@ -17,7 +17,7 @@ export function AuthProvider({ children }) {
   const [verified, setVerified] = useState(true);
   const [loading, setLoading] = useState(false);
 
-  const register = (email, password, confirmPassword, username) => {
+  const register = (email, password, confirmPassword, fullname) => {
     setLoading(true);
     if (!validateEmail(email)) {
       setError('Invalid email');
@@ -31,15 +31,15 @@ export function AuthProvider({ children }) {
       setError('Passwords do not match');
       return;
     }
-    if (!validateUsername(username)) {
-      setError('Username must be at least 3 characters long and contain only letters, numbers, and underscores');
+    if (!validateFullname(fullname)) {
+      setError('Fullname must be at least 3 characters long and contain only letters, numbers, and underscores');
       return;
     }
 
     axios.post('http://localhost:8080/auth/register', {
       "Email": email,
       "Password": password,
-      "Username": username,
+      "Fullname": fullname,
     }, {
       headers: {
         'Content-Type': 'application/json',
@@ -192,7 +192,7 @@ const isAuthenticated = async () => {
         headers: { Authorization: `Bearer ${getToken()}` }
       });
       console.log('getAuthenticatedUser response', res.data);
-      setUser(res.data);
+      setUser(res.data.user);
       return res.data;
     } catch (err) {
       console.error('getAuthenticatedUser error', err);
@@ -200,14 +200,18 @@ const isAuthenticated = async () => {
     }
   };
 
-  const edit = (username, bio, pfpPath, JobID) => {
+  const edit = (fullname, description, pfpPath, JobID, address, phone, gender) => {
     const token = localStorage.getItem('token');
     const res = axios.put('http://localhost:8080/profile/edit', {
-      "Username": username,
-      "Bio": bio,
+      "Fullname": fullname,
+      "Description": description,
       "PfpPath": pfpPath,
-      "JobID": JobID
+      "JobID": JobID,
+      "Address": address,
+      "Phone": phone,
+      "Gender": gender
     }, {
+      
       headers: {
         'content-type': 'application/json',
         'Authorization': `Bearer ${token}`,

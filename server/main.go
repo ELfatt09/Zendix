@@ -23,11 +23,12 @@ func main() {
 		AllowMethods:    []string{"GET", "POST", "PUT", "DELETE"},
 	}))
 
-	r.Static("/static", "./storage")
+	r.Static("/storage", "./storage")
 
 	auth := r.Group("/auth/")
 	jobs := r.Group("/jobs/")
 	profile := r.Group("/profile/")
+	services := r.Group("/services/")
 
 
 	auth.POST("/register", controllers.Register)
@@ -42,6 +43,9 @@ func main() {
 	auth.GET("/verified", controllers.IsVerified)
 	auth.POST("/verification/resend", controllers.SendVerificationEmail)
 	auth.PUT("/password", middlewares.RequireAuth, middlewares.RequireVerification, controllers.ChangePassword)
+
+	services.POST("/create", middlewares.RequireAuth, middlewares.RequireVerification, controllers.CreateService)
+	services.GET("/all", controllers.GetAllServices)
 
 	jobs.GET("/", controllers.GetAllJobs)
 

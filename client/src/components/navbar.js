@@ -8,74 +8,79 @@ export default function Navbar() {
   const [openMenu, setOpenMenu] = useState(false)
 
   return (
-    <nav class="bg-white whitespace-nowrap shadow-lg sticky top-0 z-50">
-      <div class="max-w-screen-xl mx-auto p-4">
-        <div class="flex items-center justify-between">
-          <a href="/" class="flex items-center space-x-3 rtl:space-x-reverse">
-            <img src="/logo.svg" class="h-8" alt="Logo" />
+    <nav className="bg-background text-space-nowrap border-b border-primary/50 sticky top-0 z-50">
+      <div className="max-w-screen-xl mx-auto p-4">
+        <div className="flex items-center justify-between">
+          <a href="/" className="flex items-center space-x-3 rtl:space-x-reverse">
+            <img src="/logo.svg" className="h-8" alt="Logo" />
           </a>
           <div className="flex items-center md:order-2 space-x-3 md:space-x-0 rtl:space-x-reverse">
             {auth ? (
-              <>
+              <div className="relative">
                 <button
                   type="button"
-                  className="flex text-sm bg-slate-200 rounded-full md:me-0 0"
+                  className="flex items-center text-sm bg-accent rounded-full p-1"
                   id="user-menu-button"
                   aria-expanded={openMenu}
-                  data-dropdown-toggle="user-dropdown"
-                  data-dropdown-placement="bottom"
                   onClick={() => setOpenMenu(!openMenu)}
                 >
                   <span className="sr-only">Open user menu</span>
                   <img
                     className="w-8 h-8 rounded-full"
-                    src={user?.pfpPath}
-                    alt=""
+                    src={`http://localhost:8080${user?.PersonalInfo.pfpPath}`}
+                    alt="User profile"
                   />
                 </button>
-                <div
-                  className={`z-50 ${openMenu ? 'absolute' : 'hidden'} my-4 text-base list-none bg-white border border-violet-600 divide-y divide-gray-300 rounded-lg shadow-sm top-12 right-4 w-44`}
-                  id="user-dropdown"
-                >
-                  <div className="px-4 py-3">
-                    <span className="block text-base text-violet-600 font-semibold ">{user?.username}</span>
-                    <span className="block text-xs text-gray-500 truncate dark:text-gray-400">
-                      {user?.email}
-                    </span>
+                {openMenu && (
+                  <div
+                    className="absolute z-50 mt-2 right-0 w-48 bg-primary rounded-lg shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none"
+                    role="menu"
+                    aria-orientation="vertical"
+                    aria-labelledby="user-menu-button"
+                  >
+                    <div className="px-4 py-3">
+                      <span className="block text-base text-accent font-semibold">{user?.PersonalInfo.Fullname}</span>
+                      <span className="block text-xs text-text truncate">{user?.Email}</span>
+                    </div>
+                    <ul className="py-2" role="none">
+                      <li>
+                        <NavLink
+                          to="/user/edit"
+                          className="block px-4 py-2 text-sm text-text hover:bg-accent/70"
+                          role="menuitem"
+                        >
+                          Edit Profile
+                        </NavLink>
+                      </li>
+                      <li>
+                        <button
+                          onClick={logout}
+                          className="block w-full text-left px-4 py-2 text-sm text-text hover:bg-accent/70"
+                          role="menuitem"
+                        >
+                          Logout
+                        </button>
+                      </li>
+                    </ul>
                   </div>
-                  <ul className="py-2" aria-labelledby="user-menu-button">
-                    <li>
-                      <NavLink
-                        to="/user/edit"
-                        className="text-center block px-4 py-2 text-sm text-gray-700 hover:text-violet-600 font-semibold hover:bg-slate-100 "
-                      >
-                        Edit Profile
-                      </NavLink>
-                    </li>
-                    <li>
-                      <button
-                        onClick={logout}
-                        className=" w-full text-center block px-4 py-2 text-sm text-gray-700 hover:text-violet-600 font-semibold hover:bg-slate-100 "
-                      >
-                        Logout
-                      </button>
-                    </li>
-                  </ul>
-                </div>
-              </>
+                )}
+              </div>
             ) : (
               <>
-                                <NavLink to="/auth/login"  className="transition ease-in-out duration-300 text-violet-600 px-4 hover:text-slate-950 hover:border-b-[3px] hover:border-orange-400 font-semibold" aria-current="page">Login</NavLink>
+                                <NavLink to="/auth/login"  className="transition ease-in-out duration-300 text-text px-10 bg-accent hover:bg-accent/70 py-2 rounded-md font-semibold" aria-current="page">Login</NavLink>
 
-                                <NavLink to="/auth/register"  className="transition ease-in-out duration-300 text-violet-600 px-4 hover:text-slate-950 hover:border-b-[3px] hover:border-orange-400 font-semibold" aria-current="page">Register</NavLink>
+                                <NavLink to="/auth/register"  className="transition ease-in-out duration-300 text-accent px-10 hover:text-accent/70 font-semibold" aria-current="page">Register</NavLink>
 
               </>
             )}
           </div>
-          <div class="items-center justify-between hidden w-full md:flex md:w-auto md:order-1" id="navbar-user">
-            <ul class="flex flex-col font-medium p-4 md:p-0 mt-4 border border-gray-100 rounded-lg bg-gray-50 md:space-x-8 rtl:space-x-reverse md:flex-row md:mt-0 md:border-0 ">
+          <div className="items-center justify-between hidden w-full md:flex md:w-auto md:order-1" id="navbar-user">
+            <ul className="flex flex-col font-medium p-4 md:p-0 mt-4 border border-gray-100 rounded-lg md:space-x-8 rtl:space-x-reverse md:flex-row md:mt-0 md:border-0 ">
               <li>
-                <NavLink to="/"  className="transition ease-in-out duration-300 text-violet-600 px-4 hover:text-slate-950 hover:border-b-[3px] hover:border-orange-400 font-semibold" aria-current="page">Home</NavLink>
+                <NavLink to="/"  className="transition ease-in-out duration-300 text-text px-4 hover:text-accent font-semibold" aria-current="page">Home</NavLink>
+              </li>
+              <li>
+                <NavLink  to="/services"  className="transition ease-in-out duration-300 text-text hover:text-accent px-4 font-semibold" aria-current="page">Services</NavLink>
               </li>
             </ul>
           </div>

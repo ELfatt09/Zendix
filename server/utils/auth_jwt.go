@@ -38,7 +38,6 @@ func CreateToken(user models.User) (string, error) {
 		"exp":      time.Now().AddDate(0, 0, 7).Unix(),
 		"sub":      user.ID,
 		"email":    user.Email,
-		"username": user.Username,
 		"verified": user.VerifiedAt != nil,
 	})
 

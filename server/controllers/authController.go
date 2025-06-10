@@ -4,6 +4,7 @@ import (
 	"log"
 	"net/http"
 
+	"zendix/models"
 	"zendix/services"
 	"zendix/utils"
 
@@ -14,7 +15,7 @@ func Register(c *gin.Context) {
 	var body struct {
 		Email    string
 		Password string
-		Username string
+		Fullname string
 	}
 
 	if err := c.Bind(&body); err != nil {
@@ -27,7 +28,7 @@ func Register(c *gin.Context) {
 		return
 	}
 
-	user, err := services.RegisterService(body.Email, body.Password, body.Username)
+	user, err := services.RegisterService(body.Email, body.Password, body.Fullname)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -73,12 +74,7 @@ func GetAuthenticatedUserData(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{
-		"email":    user.Email,
-		"username": user.Username,
-		"pfpPath":  user.PfpPath,
-		"bio":      user.Bio,
-		"jobId":    user.JobID,
-		"job":      user.Job,
+		"user": user,
 	})
 }
 func IsValid(c *gin.Context) {
@@ -99,10 +95,8 @@ func IsValid(c *gin.Context) {
 
 func EditUserInfo(c *gin.Context) {
 	var body struct {
-		Username string
-		Bio      string
-		PfpPath  string
-		JobID    *uint
+		models.UserPersonalInfo
+		models.User
 	}
 
 	if err := c.Bind(&body); err != nil {
@@ -116,17 +110,14 @@ func EditUserInfo(c *gin.Context) {
 		return
 	}
 
-	user, err := services.EditUserInfoService(tokenString, body.Username, body.Bio, body.PfpPath, body.JobID)
+	user, err := services.EditUserInfoService(tokenString, body.Fullname, body.Address, body.Phone, body.Gender, body.Description, body.PfpPath, body.JobID)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 
 	c.JSON(http.StatusOK, gin.H{
-		"username": user.Username,
-		"pfpPath":  user.PfpPath,
-		"bio":      user.Bio,
-		"jobId":    user.JobID,
+		"user": user,
 	})
 }
 
@@ -143,7 +134,6 @@ func EditUserPfp(c *gin.Context) {
 		return
 	}
 
-
 	err = services.EditUserPfpService(tokenString, pfpImage)
 
 	if err != nil {
@@ -152,7 +142,7 @@ func EditUserPfp(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{"message": "Pfp changed successfully"})
-	
+
 }
 
 func ChangePassword(c *gin.Context) {

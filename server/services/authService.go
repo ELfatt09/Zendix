@@ -14,19 +14,21 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-// RegisterService registers a new user in the database, given their email, password, and username.
-// The password is hashed with bcrypt and the user is created with the given email and username.
+// RegisterService registers a new user in the database, given their email, password, and fullname.
+// The password is hashed with bcrypt and the user is created with the given email and fullname.
 // An error is returned if there is an issue generating the hash, or if there is an issue
 // creating the user in the database. The function also sends a verification email to the user's
 // email address.
-func RegisterService(email, password, username string) (models.User, error) {
+func RegisterService(email, password, fullname string) (models.User, error) {
 	hash, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
 	if err != nil {
 		return models.User{}, err
 	}
 
-	user := models.User{Email: email, Password: string(hash), Username: username}
-	if err := initializers.DB.Create(&user).Error; err != nil {
+	user := models.User{Email: email, Password: string(hash)}
+	userPersonalInfo := models.UserPersonalInfo{Fullname: fullname}
+	user.PersonalInfo = userPersonalInfo
+	if err := initializers.DB.Preload("PersonalInfo").Create(&user).Error; err != nil {
 		return models.User{}, err
 	}
 
@@ -71,26 +73,45 @@ func GetAuthenticatedUserDataService(tokenString string) (models.User, error) {
 	}
 
 	var user models.User
-	initializers.DB.Preload("Job").First(&user, "id = ?", claim["sub"])
+	initializers.DB.Preload("Job").Preload("PersonalInfo").First(&user, "id = ?", claim["sub"])
 
 	return user, nil
 }
 
-func EditUserInfoService(tokenString, username, bio, pfpPath string, jobID *uint) (models.User, error) {
+func EditUserInfoService(tokenString, fullname, Address, Phone, Gender, description, pfpPath string, jobID *uint) (models.User, error) {
 	claim, err := utils.ParseToken(tokenString)
 	if err != nil {
 		return models.User{}, errors.New("token not valid")
 	}
 
 	var user models.User
-	initializers.DB.First(&user, "id = ?", claim["sub"])
+	var userPersonalInfo models.UserPersonalInfo
+	if err := initializers.DB.Preload("PersonalInfo").First(&user, "id = ?", claim["sub"]).Error; err != nil {
+		return models.User{}, err
+	}
+	if err := initializers.DB.First(&userPersonalInfo, "user_id = ?", claim["sub"]).Error; err != nil {
+		return models.User{}, err
+	}
 
-	user.Username = username
-	user.Bio = bio
-	user.PfpPath = pfpPath
+	userPersonalInfo.Fullname = fullname
+	userPersonalInfo.Address = Address
+	userPersonalInfo.Phone = Phone
+	userPersonalInfo.Gender = Gender
+	userPersonalInfo.Description = description
+	userPersonalInfo.PfpPath = pfpPath
+
+
 	user.JobID = jobID
 
-	if err := initializers.DB.Preload("Job").Save(&user).Error; err != nil {
+// Baru update data user
+
+
+
+	if err := initializers.DB.Save(&user).Error; err != nil {
+		return models.User{}, err
+	}
+
+	if err := initializers.DB.Save(&userPersonalInfo).Error; err != nil {
 		return models.User{}, err
 	}
 
@@ -104,11 +125,12 @@ func EditUserPfpService(tokenString string, pfpImage *multipart.FileHeader) erro
 	}
 
 	var user models.User
-	initializers.DB.First(&user, "id = ?", claim["sub"])
+	if err := initializers.DB.Preload("PersonalInfo").First(&user, "id = ?", claim["sub"]).Error; err != nil {
+		return errors.New("user not found")
+	}
 
-	NewFileName := time.Now().Format("2006-01-02-15-04-05") + pfpImage.Filename
-
-	destination := "storage/" + NewFileName
+	newFileName := time.Now().Format("2006-01-02-15-04-05") + pfpImage.Filename
+	destination := "storage/pfp/" + newFileName
 
 	file, err := pfpImage.Open()
 	if err != nil {
@@ -120,12 +142,19 @@ func EditUserPfpService(tokenString string, pfpImage *multipart.FileHeader) erro
 	if err != nil {
 		return errors.New("failed to read profile picture")
 	}
+
 	if err := os.WriteFile(destination, data, 0644); err != nil {
 		return errors.New("failed to save profile picture")
 	}
 
-	user.PfpPath = destination
-	if err := initializers.DB.Save(&user).Error; err != nil {
+	if user.PersonalInfo.PfpPath != "" {
+		if err := os.Remove("." + user.PersonalInfo.PfpPath); err != nil {
+			return errors.New("failed to delete old profile picture")
+		}
+	}
+
+	user.PersonalInfo.PfpPath = "/" + destination
+	if err := initializers.DB.Save(&user.PersonalInfo).Error; err != nil {
 		return errors.New("failed to update user profile picture path")
 	}
 

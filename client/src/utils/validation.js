@@ -4,6 +4,6 @@ export const validateEmail = (email) =>
 export const validatePassword = (password) => 
   /^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.{8,})/.test(password);
 
-export const validateUsername = (username) => 
-  /^[a-zA-Z\s]{3,}$/.test(username);
+export const validateFullname = (fullname) => 
+  /^[a-zA-Z\s]{3,}$/.test(fullname);
 

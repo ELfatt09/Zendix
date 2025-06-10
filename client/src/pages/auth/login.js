@@ -12,31 +12,31 @@ function Login() {
   }
 
   return (
-    <section className="bg-white">
+    <section className="bg-background">
       <div className="flex flex-col items-center justify-center px-6 py-8 mx-auto md:h-screen lg:py-0">
-        <div className="w-full bg-white rounded-lg shadow md:mt-0 sm:max-w-md xl:p-0 ">
-          <div className="p-6 space-y-4 md:space-y-6 sm:p-8">
-            <h1 className="text-xl font-bold leading-tight tracking-tight text-violet-600 md:text-2xl ">
+        <div className="w-full bg-primary/30 rounded-lg shadow md:mt-0 sm:max-w-md xl:p-0 ">
+          <div className="p-6 space-y-4 md:space-y-6 sm:p-8 ">
+            <h1 className="text-xl font-bold leading-tight tracking-tight text-text md:text-2xl ">
               Sign in to your account
             </h1>
-            <form className="space-y-4 md:space-y-6" onSubmit={handleSubmit}>
+            <form className="" onSubmit={handleSubmit}>
               <div>
-                <label htmlFor="email" className="block mb-2 text-sm font-medium text-slate-950 ">
+                <label htmlFor="email" className="block mb-2 text-sm font-medium text-text ">
                   Your email
                 </label>
                 <input
                   type="email"
                   name="email"
                   id="email"
-                  className="bg-gray-50 border border-slate-400 text-slate-950 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 "
+                  className="bg-secondary/50 text-text text-sm rounded-lg focus:border-accent block w-full p-2.5 "
                   placeholder="name@company.com"
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                 />
               </div>
-              <div>
-                <label htmlFor="password" className="block mb-2 text-sm font-medium text-slate-950 ">
+              <div className='mt-6'>
+                <label htmlFor="password" className="block mb-2 text-sm font-medium text-text">
                   Password
                 </label>
                 <input
@@ -44,7 +44,7 @@ function Login() {
                   name="password"
                   id="password"
                   placeholder="••••••••"
-                  className="bg-gray-50 border border-slate-400 text-slate-950 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 "
+                  className="bg-secondary/50 text-text text-sm rounded-lg focus:border-accent block w-full p-2.5 "
                   required
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
@@ -56,11 +56,11 @@ function Login() {
               {message && <p className="text-green-600">{message}</p>}
               <button
                 type="submit"
-                className="w-full text-center bg-violet-600 text-white px-5 py-3 font-bold rounded-md  hover:bg-orange-400 hover:scale-105 transition ease-in-out duration-300"              >
+                className="mt-10 mb-6 w-full text-center bg-accent text-text px-5 py-3 font-bold rounded-md  hover:bg-accent/70 transition ease-in-out duration-300"              >
                 Sign in to your account
               </button>
-              <p className="text-sm font-light text-slate-700">
-                Dont have an account yet? <NavLink to="/auth/register" className="font-medium text-orange-400 hover:underline">Register here</NavLink>
+              <p className="text-sm font-light text-text">
+                Dont have an account yet? <NavLink to="/auth/register" className="font-medium text-accent hover:underline">Register here</NavLink>
               </p>
             </form>
           </div>

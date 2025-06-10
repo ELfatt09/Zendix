@@ -23,8 +23,8 @@ func IsUserVerifiedService(tokenString string) (bool, error) {
 
 func SendVerificationEmail(userEmail string) error {
 	var user models.User
-	initializers.DB.Select("username").First(&user, "email = ?", userEmail)
-	username := user.Username
+	initializers.DB.Preload("PersonalInfo").Select("fullname").First(&user, "email = ?", userEmail)
+	fullname := user.PersonalInfo.Fullname
 	from := os.Getenv("APP_EMAIL_ADDRESS")
 	pass := os.Getenv("APP_EMAIL_PASSWORD")
 	to := userEmail
@@ -35,8 +35,8 @@ func SendVerificationEmail(userEmail string) error {
 
 	msg := "From: " + from + "\n" +
 		"To: " + to + "\n" +
-		"Subject: Hello " + username + "! This is your email verification token.\n\n" +
-		"Hello " + username + "! Thank you for Sign Up to Zendix lets get you verified.\n\n" + "Verification Token: " + tokenString
+		"Subject: Hello " + fullname + "! This is your email verification token.\n\n" +
+		"Hello " + fullname + "! Thank you for Sign Up to Zendix lets get you verified.\n\n" + "Verification Token: " + tokenString
 
 	err = smtp.SendMail("smtp.gmail.com:587",
 		smtp.PlainAuth("", from, pass, "smtp.gmail.com"),
